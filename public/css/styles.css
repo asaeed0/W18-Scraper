@@ -1,0 +1,36 @@
+main {
+    display: grid;
+    grid-template-columns: 2fr 5fr 2fr;
+    grid-template-rows: 100vh;
+    
+    font-family: 'Dosis', sans-serif;
+}
+
+.headlines,
+.articles,
+.comments {
+    overflow: scroll;
+}
+
+.headline:hover {
+    cursor: pointer;
+}
+
+.headline > a {
+    font-weight: 400;
+    font-size: 1em;
+    text-decoration: none;
+}
+
+.headline > p { 
+    font-weight: 200;
+    font-size: 0.8em;
+}
+
+.article {
+    padding: 15px;
+}
+
+.article > h2 {
+    text-align: center;
+}
