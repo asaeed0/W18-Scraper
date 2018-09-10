@@ -13,12 +13,6 @@ const meta = {
     nyTimes: {
         type: 'string'
     },
-    dawn: {
-        type: 'string'
-    },
-    cbc: {
-        type: 'string'
-    },
 };
 
 //  News Article Schema - Identical for all News Outlets
@@ -29,12 +23,6 @@ const articleSchema = {
     url: {
         type: 'string',
     },
-    outlet: {
-        type: 'string',
-    },
-    date: {
-        type: 'string',
-    },
     summary: {
         type: 'string',
     },
@@ -42,7 +30,10 @@ const articleSchema = {
         type: 'array',
         default: [],
     },
-    article: {
+    story: {
+        type: 'array',
+    },
+    scrapeDate: {
         type: 'string',
     },
 };
@@ -54,21 +45,15 @@ const articleSchema = {
 
 
 //  Schema Constructors
-const nyTimesSchema = new Schema(articleSchema, { collection: 'nyTimes' });
-//  const dawnSchema = new Schema(articleSchema, { collection: 'dawn' });
-//  const cbcSchema = new Schema(articleSchema, { collection: 'cbc' });
 const metaSchema = new Schema(meta, { collection: 'meta' });
+const nyTimesSchema = new Schema(articleSchema, { collection: 'nyTimes' });
 
 //  Model Constructors
-const ArticleNyTimes = mongoose.model('Article', nyTimesSchema);
-//  const ArticleDawn = mongoose.model('Article', dawnSchema);
-//  const ArticleCbc = mongoose.model('Article', cbcSchema);
 const Meta = mongoose.model('Meta', metaSchema);
+const ArticleNyTimes = mongoose.model('Article', nyTimesSchema);
 
 
 module.exports = {
-    ArticleNyTimes: ArticleNyTimes,
-    // ArticleDawn: ArticleDawn,
-    // ArticleCbc: ArticleCbc,
     Meta: Meta,
+    ArticleNyTimes: ArticleNyTimes,
 };

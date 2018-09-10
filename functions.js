@@ -19,5 +19,16 @@ module.exports = {
             return false;
         }
     },
+
+    Article: function(headline, url, summary, date) {
+        this.headline = headline;
+        this.url = url;
+        if(summary.length > 1) {
+            this.summary = summary;
+        }
+        this.story = [];
+        this.comments = [];
+        this.scrapeDate = date;
+    }
 }
 

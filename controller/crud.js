@@ -13,7 +13,7 @@ function checkLastUpdate(newsOutlet) {
 
 function getArticles(date) {
     return new Promise(resolve => {
-        models.ArticleNyTimes.find({ date: date }).exec( (err, data) => {
+        models.ArticleNyTimes.find({ scrapeDate: date }).exec( (err, data) => {
             if(err) return handleError(err);
             console.log('Articles retrieved from MongoDB')
             resolve(data);
@@ -45,9 +45,23 @@ function findArticle(id) {
     return new Promise(resolve => {
         models.ArticleNyTimes.findById(id, (err, res) => {
             if(err) return handleError(err);
-            console.log('Article Found');
+            console.log(`Found Article: ${id}`);
             resolve(res);
         })
+    })
+}
+
+function addComment(id, comment) {
+    return new Promise(resolve => {
+        
+        models.ArticleNyTimes.updateOne({ _id: id }, { $push: {comments : comment} }, (err, res) => {
+            if(err) return handleError(err);
+            console.log(`Comment added to article id: ${id}`);
+            findArticle(id).then(article => {
+                resolve(article)
+            })
+        })
+
     })
 }
 
@@ -58,4 +72,5 @@ module.exports = {
     updateLastScrape: updateLastScrape,
     bulkInsertArticles: bulkInsertArticles,
     findArticle: findArticle,
+    addComment: addComment,
 };

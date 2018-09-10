@@ -1,6 +1,5 @@
 const request = require('request');
 const cheerio = require('cheerio');
-const fs = require('fs');
 const funcs = require('../functions');
 
 const customHeaderRequest = request.defaults({
@@ -9,11 +8,9 @@ const customHeaderRequest = request.defaults({
     }
 });
 
-
 //  Returns a Promise
 //  Returns an array of objects, each containing: headline, summary(if exists), url
-function nyTimes() {
-    console.log('Begin Scrape: NYTimes');
+function nyTimesHeadlines() {
     return new Promise(resolve => {
         
         customHeaderRequest.get({
@@ -27,18 +24,17 @@ function nyTimes() {
                 let $ = cheerio.load(body);
             
                 let articles = [];
-                let date = funcs.getDate();
 
                 $('article').each(function(i, elem) {
                     
-                    let article = {};
+                    let hlCheck = $('.headline', this).text().trim();
                     
-                    article.headline = $('.headline', this).text().trim();
-                    article.url = $('a', this).attr('href');
-                    article.outlet = 'nyTimes';
-                    article.date = date;
-                    article.summary = $('.summary', this).text().trim();
-                    article.comments = [];
+                    let headline = hlCheck;
+                    let url = $('a', this).attr('href');
+                    let summary = $('.summary', this).text().trim();
+                    let date = funcs.getDate();
+                    
+                    let article = new funcs.Article(headline, url, summary, date)
 
                     articles.push(article);
                 });
@@ -50,12 +46,12 @@ function nyTimes() {
 }
 
 //  Returns a Promise
-//  Returns an array of objects, each containing: headline, summary(if exists), url
-function nyTimesArticle(articleUrl) {
+//  Returns a string of the article
+function nyTimesStory(articleObj) {
     return new Promise(resolve => {
         
         customHeaderRequest.get({
-            url: articleUrl,
+            url: articleObj.url,
             jar: true,
             followAllRedirects: true
         }, (error, response, body) => {
@@ -64,17 +60,20 @@ function nyTimesArticle(articleUrl) {
                 
                 let $ = cheerio.load(body);
                 
-                let article = ``;
+                let story = [];
 
                 $('.StoryBodyCompanionColumn').each(function(i, elem) {
                     
-                    paragraph = $('p', this).text().trim();
+                    let paragraph = $('p', this).text().trim();
+                    if(paragraph.length > 2) {
+                        story.push(paragraph);
+                    }
 
-                    article = article + ' ' + paragraph;
                 });
 
-                // console.log(article);
-                resolve(article);
+                articleObj.story = story;
+
+                resolve(articleObj);
             }
         });
 
@@ -82,105 +81,20 @@ function nyTimesArticle(articleUrl) {
 
 }
 
-//  Fun
-function scrapeNyTimes() {
+function nyTimesArticles() {
     return new Promise(resolve => {
         (async () => {
-            let result = await nyTimes();
-            for (let article in result) {
-                let url = (result[article].url);
-                result[article].article = await nyTimesArticle(url);
-                console.log(`Article ${article} scraped`);
+            console.log(`Begin Scrape 'New York Times'`);
+            let articles = await nyTimesHeadlines();
+            for(let i = 0; i < articles.length; i++ ) {
+                console.log(`Scraping NYTimes article ${i}: '${articles[i].headline}'`);
+                articles[i] = await nyTimesStory(articles[i])
             }
-            resolve(result);
-        })();
+            resolve(articles);
+        }) ();
     })
-}
-
-//  Returns a Promise
-//  Returns an array of objects, each containing: headline, summary(if exists), url
-function cbc() {
-    console.log('Begin Scrape: CBC');
-    return new Promise(resolve => {
-        
-        customHeaderRequest.get({
-            url: `http://www.cbc.ca/news/world`,
-            jar: true,
-            followAllRedirects: true
-        }, (error, response, body) => {
-
-            if (!error && response.statusCode == 200) {
-                
-                let $ = cheerio.load(body);
-
-                let output = [];
-
-                $('.card').each(function(i, elem) {
-                
-                    let article = {};
-                    
-                    article.headline = $('.headline', this).text().trim();
-                    article.summary = $('.description', this).text();
-                    article.url = `http://www.cbc.ca${$(this).attr('href')}`;
-
-                    output.push(article);
-                })
-
-                resolve(output);
-            }
-        });
-
-    });
-}
-
-//  Returns a Promise
-//  Returns an array of objects, each containing: headline, summary(if exists), url
-function dawn() {
-    console.log('Begin Scrape: Dawn');
-    return new Promise(resolve => {
-        
-        customHeaderRequest.get({
-            url: `https://www.dawn.com/world`,
-            jar: true,
-            followAllRedirects: true
-        }, (error, response, body) => {
-
-            if (!error && response.statusCode == 200) {
-                
-                let $ = cheerio.load(body);
-
-                let output = [];
-
-                $('article').each(function(i, elem) {
-                
-                    let article = {};
-                    
-                    article.headline = $('.story__link', this).text().trim();
-                    article.summary = $('.story__excerpt', this).text();
-                    article.url = $('.story__link', this).attr('href');
-
-                    output.push(article);
-                })
-
-                resolve(output);
-            }
-        });
-
-    });
 }
 
 module.exports = {
-    scrapeNyTimes: scrapeNyTimes,
+    NyTimes: nyTimesArticles,
 };
-
-
-// DEV
-
-/* scrapeNyTimes().then(data => {
-    let obj = {
-        articles: data,
-    };
-    fs.writeFileSync('./data/data.json', obj);
-    console.log(data[1]);
-    console.log(data[2]);
-}) */

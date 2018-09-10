@@ -1,3 +1,8 @@
+html,
+body {
+    margin: 0px;
+    padding: 0px;
+}
 main {
     display: grid;
     grid-template-columns: 2fr 5fr 2fr;
@@ -6,10 +11,22 @@ main {
     font-family: 'Dosis', sans-serif;
 }
 
+.section-heading {
+    text-align: center;
+    text-decoration: underline;
+    height: 70px;
+}
+
 .headlines,
-.articles,
+.story,
 .comments {
     overflow: scroll;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.headlines h1 {
+    text-align: center;
 }
 
 .headline:hover {
@@ -31,6 +48,11 @@ main {
     padding: 15px;
 }
 
-.article > h2 {
+.story-heading {
     text-align: center;
+}
+
+.comment-author {
+    font-weight: bold;
+    text-transform: capitalize;
 }
