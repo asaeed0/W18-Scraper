@@ -4,6 +4,7 @@
   "description": "A node based news scraper",
   "main": "app.js",
   "scripts": {
+    "start": "node app",
     "test": "nodemon app.js"
   },
   "repository": {
